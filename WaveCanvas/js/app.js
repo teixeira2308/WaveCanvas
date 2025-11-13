@@ -5,9 +5,24 @@ class App {
         this.visualizationEngine = new VisualizationEngine('audioCanvas');
         this.uiManager = new UIManager(this);
         this.exportManager = new ExportManager(this.visualizationEngine);
+
+        this.states= {
+            INITIALIZING: 'initializing',
+            READY: 'ready',
+            LOADING_AUDIO: 'loading_audio',
+            PLAYING: 'playing',
+            ERROR: 'error'
+        };
+        this.currentState = this.states.INITIALIZING;
         
         // Inicialização
         this.init();
+    }
+
+    setState(newState) {
+        console.log(`Estado: ${this.currentState} -> ${newState}`);
+        this.currentState = newState;
+        this.updateUIForState();
     }
     
     init() {
@@ -17,12 +32,22 @@ class App {
     
     startMicrophone() {
         // TODO: iniciar captura do microfone
-        console.log('Iniciando microfone...');
+
     }
     
-    loadAudioFile(file) {
+    async loadAudioFile(file) {
         // TODO: carregar ficheiro de áudio
         console.log('Carregando ficheiro de áudio...');
+        try {
+            await this.loadAudioWithTimeout(file, 10000);
+            this.uiManager.updateAudioInfo(`A tocar: ${file.name}`);
+        } catch (error) {
+            if (error.message.includes('Timeout')) {
+                this.uiManager.showError('Ficheiro demorou muito a carregar');
+            } else {
+                this.uiManager.showError(error.message);
+            }
+        }
     }
     
     stopAudio() {

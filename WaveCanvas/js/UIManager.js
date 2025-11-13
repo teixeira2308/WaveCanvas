@@ -90,6 +90,13 @@ class UIManager {
     
     setupAudioLevels() {
         // TODO: configurar monitorização de níveis de áudio
+        setInterval(() => {
+            if (this.audioProcessor.isRunning()) {
+                const level = this.audioProcessor.calculateAudioLevel();
+                this.updateLevelBars(level);
+                this.updateAudioInfo(`Nível: ${Math.round(level * 100)}%`);
+            }
+        }, 100);
     }
     
     createPropertyControl(property, value, min, max, step) {

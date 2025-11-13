@@ -10,13 +10,7 @@ class AudioVisualization {
         this.audioProcessor = audioProcessor;
         this.name = 'Visualização';
         this.properties = {};
-        this.testData = new Uint8Array(256);
         this.frameCount = 0;
-        
-        // Inicializar dados de teste
-        for (let i = 0; i < this.testData.length; i++) {
-            this.testData[i] = Math.sin(i / 10) * 128 + 128;
-        }
     }
     
     draw() {
@@ -60,8 +54,20 @@ class AudioVisualization {
         return this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
     }
     
-    normalizeData() {
+    normalizeData(data, min = 0, max = 255) {
         // TODO: normalizar dados de áudio
-        return [];
+        return Array.from(data).map(value => (value - min) / (max - min));
     }
+
+    applySensitivity(normalizedData, sensitivity) {
+        return normalizedData.map(value => value * sensitivity);
+    }
+
+    mapToCanvas(normalizedValue, canvasDimension, reverse = false) {
+        if (reverse) {
+            return (1 - normalizedValue) * canvasDimension;
+        }
+        return normalizedValue * canvasDimension;
+    }
+    
 }

@@ -7,7 +7,9 @@ class SpectrumVisualization extends AudioVisualization {
         this.properties = {
             barWidth: 2,
             colorScheme: "rainbow",
-            showGrid: true
+            showGrid: true,
+            sensitiviy: 1.0,
+            smoothing: 0.8
         };
         // Inicializar propriedades específicas
     }
@@ -52,7 +54,7 @@ class SpectrumVisualization extends AudioVisualization {
     }
 
     update() {
-        const rawData = this.getFrequencyData();
+        const rawData = this.audioProcessor.getFrequencyData();
         this.smoothedData = this.smoothData(this.smoothedData, rawData, 0.1);
     }
 

@@ -22,7 +22,7 @@ class App {
     setState(newState) {
         console.log(`Estado: ${this.currentState} -> ${newState}`);
         this.currentState = newState;
-        this.updateUIForState();
+        //this.updateUIForState();
     }
     
     init() {
@@ -90,6 +90,7 @@ class App {
         this.visualizationEngine.stop();
         console.log('Aplicação destruída');
     }
+    
 }
 
 // Inicialização da aplicação quando o DOM estiver carregado

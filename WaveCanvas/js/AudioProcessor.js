@@ -107,10 +107,12 @@ class AudioProcessor {
                 } catch (error) {
                     reject(new Error(`Erro ao processar áudio: ${error.message}`));
                 }
-            }
+            };
+            reader.onerror = () => {
+                reject(new Error('Erro ao ler ficheiro'));
+            };
+            reader.readAsArrayBuffer(file);
         });
-
-
     }
     
     stop() {

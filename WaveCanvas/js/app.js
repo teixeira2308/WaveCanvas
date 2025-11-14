@@ -27,47 +27,68 @@ class App {
     
     init() {
         // TODO: inicializar a aplicação
+        this.setState(this.states.READY);
         console.log('App inicializada');
     }
     
-    startMicrophone() {
+    async startMicrophone() {
         // TODO: iniciar captura do microfone
-
+        try {
+            this.setState(this.states.LOADING_AUDIO);
+            await this.audioProcessor.startMicrophone();
+            this.visualizationEngine.start(this.audioProcessor);
+            this.uiManager.setButtonStates(true);
+            this.setState(this.states.PLAYING);
+        } catch (error) {
+            console.error('Erro ao iniciar microfone: ', error);
+            this.setState(this.states.ERROR);
+            this.uiManager.showError(`Erro no microfone: ${error.message}`);
+        }
     }
     
     async loadAudioFile(file) {
         // TODO: carregar ficheiro de áudio
-        console.log('Carregando ficheiro de áudio...');
         try {
-            await this.loadAudioWithTimeout(file, 10000);
+            this.setState(this.states.LOADING_AUDIO);
+            await this.audioProcessor.loadAudioFile(file);
+            this.visualizationEngine.start(this.audioProcessor);
             this.uiManager.updateAudioInfo(`A tocar: ${file.name}`);
+            this.uiManager.setButtonStates(true);
+            this.setState(this.states.PLAYING);
         } catch (error) {
-            if (error.message.includes('Timeout')) {
-                this.uiManager.showError('Ficheiro demorou muito a carregar');
-            } else {
-                this.uiManager.showError(error.message);
-            }
+            console.error('Erro ao carregar áudio: ', error);
+            this.setState(this.states.ERROR);
+            this.uiManager.showError(error.message);
         }
     }
     
     stopAudio() {
         // TODO: parar áudio
-        console.log('Parando áudio...');
+        this.audioProcessor.stop();
+        this.visualizationEngine.stop();
+        this.uiManager.setButtonStates(false);
+        this.uiManager.updateAudioInfo('Áudio parado');
+        this.setState(this.states.READY);
     }
     
     setVisualization(type) {
         // TODO: definir tipo de visualização
-        console.log(`Definindo visualização: ${type}`);
+        if (this.visualizationEngine.setVisualization(type)) {
+            console.log(`Definindo visualização: ${type}`);
+        }
+        return this.visualizationEngine.setVisualization(type);
     }
     
     exportFrame() {
         // TODO: exportar frame atual
-        console.log('Exportando frame...');
+        this.exportManager.exportAsPNG();
     }
     
     destroy() {
         // TODO: limpar recursos
-        console.log('Destruindo aplicação...');
+        this.stopAudio();
+        this.visualizationEngine.stop();
+        console.log('Aplicação destruída');
     }
 }
 

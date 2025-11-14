@@ -3,21 +3,23 @@ class AudioProcessor {
     constructor() {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            console.log(this.audioContext.state);
+            this.setupAnalyser();
         } catch (error) {
             console.error('Web Audio API não suportada:', error);
             throw new Error('Navegador não suporta Web Audio API');
         }
-        this.analyser = this.audioContext.createAnalyser();
-        this.analyser.smoothingTimeConstant = 0.8;
+        //this.analyser = this.audioContext.createAnalyser();
+       //this.analyser.smoothingTimeConstant = 0.8;
         this.mediaStream = null;
-        this.frequencyData = new Uint8Array();
-        this.waveformData = new Uint8Array();
+        this.source = null;
+        //this.frequencyData = new Uint8Array();
+        //this.waveformData = new Uint8Array();
         this.isPlaying = false;
         this.isInitializing = false;
-        this.getFrequencyData() --> SpectrumVisualization;
+        /*this.getFrequencyData() --> SpectrumVisualization;
         this.getWaveformData() --> WaveformVisualization;
         this.calculateAudioLevel() --> ParticleVisualization;
+        */
     }
 
     setupAnalyser() {
@@ -34,57 +36,49 @@ class AudioProcessor {
     }
     
     async startMicrophone() {
+        // TODO: iniciar captura do microfone
+        if (this.isInitializing) {
+            console.log('Iniciando captura do microfone...');
+        }
 
+        this.isInitializing = true;
         try {
+            this.stop();
+            await this.ensureRunning();
 
-        
-            // TODO: iniciar captura do microfone
-            if (this.isInitializing) {
-                console.log('Iniciando captura do microfone...');
-                return;
-            }
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    channelCount: 1,
+                }
+            });
 
-            this.isInitializing = true;
-            try {
+            this.connectSource(stream);
+            this.mediaStream = stream;
+            this.isPlaying = true;
 
-                this.uiManager.updateAudioInfo('A iniciar microfone...');
+            /*this.uiManager.setButtonStates(true);
+            this.uiManager.updateAudioInfo('Microfone ativo!');
 
-                this.stop();
-
-                await this.ensureRunning();
-
-                stream = await navigator.mediaDevices.getUserMedia({audio: true});
-
-                this.connectSource(stream);
-
-                this.uiManager.setButtonStates(true);
-                this.uiManager.updateAudioInfo('Microfone ativo!');
-
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true,
-                        channelCount: 1,
-                    }
-                });
-                const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-
-                await this.audioContext.resume();
-                await this.audioContext.suspend();
-                // Devolver Promise
-                const mediaSource = this.audioContext.createMediaStreamSource(stream);
-                return mediaSource;
-            } finally {
-                this.isInitializing = false;
-            } 
             
+            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+            await this.audioContext.resume();
+            await this.audioContext.suspend();
+            // Devolver Promise
+            const mediaSource = this.audioContext.createMediaStreamSource(stream);
+            return mediaSource;
+            */
         } catch (error) {
             console.error('Erro no microfone:', error);
-            this.uiManager.showError(`Microfone falhou: ${error.message}`);
-            this.uiManager.setButtonStates(false);
+        } finally {
+            this.isInitializing = false;
         }
-    }
+            
+    } 
+            
 
     async ensureRunning() {
         if (this.audioContext.state === 'suspended') {
@@ -95,16 +89,28 @@ class AudioProcessor {
     async loadAudioFile(file) {
         // TODO: carregar ficheiro de áudio
         console.log('Carregando ficheiro de áudio...');
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const audioData = e.target.result;
-            const audioBuffer = await this.audioContext.decodeAudioData(audioData);
-            const source = this.audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            return source;
-        };
-        // Devolver Promise
-        reader.readAsArrayBuffer(file);
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const audioData = e.target.result;
+                    const audioBuffer = await this.audioContext.decodeAudioData(audioData);
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+
+                    this.connectSource(source);
+                    source.start(0);
+                    this.isPlaying = true;
+
+                    resolve('Audio carregado com sucesso!');
+                } catch (error) {
+                    reject(new Error(`Erro ao processar áudio: ${error.message}`));
+                }
+            }
+        });
+
+
     }
     
     stop() {
@@ -112,40 +118,58 @@ class AudioProcessor {
         console.log('Parando processamento de áudio...');
         if (this.mediaStream) {
             this.mediaStream.getTracks().forEach(track => track.stop());
+            this.mediaStream = null;
         }
 
         if (this.source && this.source.stop) {
             this.source.stop();
+            this.source.disconnect();
+            this.source = null;
         }
 
         if (this.audioContext) {
             this.audioContext.suspend();
         }
+        this.isPlaying = false;
     }
     
     update() {
         // TODO: atualizar dados de áudio
-        this.analyser.getByteFrequencyData(this.frequencyData);
-        this.analyser.getByteTimeDomainData(this.waveformData);
+        if (this.analyser && this.isPlaying) {
+            this.analyser.getByteFrequencyData(this.frequencyData);
+            this.analyser.getByteTimeDomainData(this.waveformData);
+            return true;
+        }
+        return false;
     }
     
     getFrequencyData() {
         // TODO: obter dados de frequência
-        const rawData = this.AudioProcessor.getFrequencyData();
-        return this.normalizeData(rawData);
+        if (this.frequencyData) {
+            return new Uint8Array(this.frequencyData);
+        } else {
+            return new Uint8Array();
+        }
     }
     
     getWaveformData() {
         // TODO: obter dados de forma de onda
-        const rawData = this.AudioProcessor.getWaveformData();
-        return Array.from(rawData).map(value => {
+        if (!this.waveformData) return new Uint8Array();
+
+        return Array.from(this.waveformData).map(value => {
             return (value - 128) / 128;
         });
     }
     
     calculateAudioLevel() {
         // TODO: calcular nível de áudio
-        return 0;
+        if (!this.frequencyData || this.frequencyData.length === 0) return 0;
+
+        let sum = 0;
+        for (let i = 0; i < this.frequencyData.length; i++) {
+            sum += this.frequencyData[i];
+        }
+        return sum / (this.frequencyData.length * 255);
     }
 
     connectSource(source) {
@@ -155,15 +179,15 @@ class AudioProcessor {
 
         if (source instanceof MediaStream) {
             const mediaSource = this.audioContext.createMediaStreamSource(source);
-            mediaSource.connect(this.analyser);
+            //mediaSource.connect(this.analyser);
             this.source = mediaSource;
         } else {
-            source.connect(this.analyser);
+            //source.connect(this.analyser);
             this.source = source;
         }
+        this.source.connect(this.analyser);
         this.analyser.connect(this.audioContext.destination);
     }
 
-    
 
 }

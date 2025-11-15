@@ -38,9 +38,14 @@ class VisualizationEngine {
 
         this.currentVisualization = this.visualizations.get(type);
 
+        this.currentVisualization.canvas = this.canvas;
+        this.currentVisualization.ctx = this.canvas.getContext('2d');
+
         if (this.audioProcessor) {
             this.currentVisualization.audioProcessor = this.audioProcessor;
         }
+
+        this.currentVisualization.resize(this.canvas.width, this.canvas.height);
 
         console.log(`Visualização definida: ${type}`);
         return true;
@@ -50,8 +55,16 @@ class VisualizationEngine {
         // TODO: iniciar animação
         this.audioProcessor = audioProcessor;
 
+        for (const [key, viz] of this.visualizations) {
+            viz.audioProcessor = audioProcessor;
+            viz.canvas = this.canvas;
+            viz.ctx = this.canvas.getContext('2d');
+        }
+
         if (this.currentVisualization) {
             this.currentVisualization.audioProcessor = audioProcessor;
+            this.currentVisualization.canvas = this.canvas;
+            this.currentVisualization.ctx = this.canvas.getContext('2d');
         }
 
         if(this.isRunning) {
@@ -82,8 +95,18 @@ class VisualizationEngine {
         }
 
         if (this.currentVisualization) {
-            this.currentVisualization.update();
-            this.currentVisualization.draw();
+            if (!this.currentVisualization.ctx && typeof this.currentVisualization.ctx.fillRect !== 'function') {
+                console.error('Contexto inválido, reestabelecendo...');
+                this.currentVisualization.canvas = this.canvas;
+                this.currentVisualization.ctx = this.canvas.getContext('2d');
+            } 
+
+            try {
+                this.currentVisualization.update();
+                this.currentVisualization.draw();
+            } catch (error) {
+                console.error('Erro ao desenhar visualização: ', error);
+            }
         }
 
         this.animationId = requestAnimationFrame(() => this.animate());
@@ -96,7 +119,15 @@ class VisualizationEngine {
             this.canvas.width = container.clientWidth;
             this.canvas.height = container.clientHeight;
 
+            for (const [key, viz] of this.visualizations) {
+                viz.canvas = this.canvas;
+                viz.ctx = this.canvas.getContext('2d');
+                viz.resize(this.canvas.width, this.canvas.height);
+            }
+
             if(this.currentVisualization) {
+                this.currentVisualization.canvas = this.canvas;
+                this.currentVisualization.ctx = this.canvas.getContext('2d');
                 this.currentVisualization.resize(this.canvas.width, this.canvas.height);
             }
         }

@@ -16,23 +16,42 @@ class SpectrumVisualization extends AudioVisualization {
     
     draw() {
         // TODO: desenhar espectro de frequências
-        this.clearCanvas();
 
         if (this.properties.showGrid) {
             this.drawGrid();
         }
         
         // Implementação básica para teste
-        const data = this.audioProcessor.getFrequencyData();
-        const barWidth = (this.canvas.width / data.length) * 2.5;
+        const data = this.audioProcessor ? this.audioProcessor.getFrequencyData() : this.testData;
+        if (!data || data.lenght === 0) return;
+
+        const barWidth = Math.max(2, (this.canvas.width / data.lenght) * 2.5);
         
-        for (let i = 0; i < data.length; i++) {
-            const barHeight = (data[i] / 255) * this.canvas.height;
+        for (let i = 0; i < data.lenght; i++) {
+            const value = data[i] / 255;
+            const barHeight = value * this.canvas.height * this.properties.sensitivity;
             const x = i * barWidth;
             const y = this.canvas.height - barHeight;
+
+            const hue = (i / data.lenght) * 300;
+            const saturation = 100;
+            const lightness = 50 + (value * 20);
             
-            this.ctx.fillStyle = `hsl(${i / data.length * 360}, 100%, 50%)`;
+            this.ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
             this.ctx.fillRect(x, y, barWidth - 1, barHeight);
+        }
+    }
+
+    drawGrid() {
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        this.ctx.lineWidth = 1;
+
+        for (let i = 0; i <= 4; i++) {
+            const y = (this.canvas.height / 4) * i;
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.canvas.width, y);
+            this.ctx.stroke();
         }
     }
     
@@ -49,9 +68,10 @@ class SpectrumVisualization extends AudioVisualization {
     }
 
     update() {
+        this.frameCount++;
         if (this.audioProcessor) {
             const rawData = this.audioProcessor.getFrequencyData();
-            this.smoothedData = this.smoothData(this.smoothedData, rawData, 0.1);
+            this.smoothedData = this.smoothData(this.smoothedData, rawData, this.properties.smoothing);
         }
     }
 

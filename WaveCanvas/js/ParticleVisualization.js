@@ -4,6 +4,11 @@ class ParticleVisualization extends AudioVisualization {
         this.name = 'Partículas';
         this.particles = [];
         this.lastTime = 0;
+        this.properties = {
+            particleCount: 100,
+            maxDistance: 120,
+            audioReactivity: 1.5
+        };
         
         // Inicializar partículas
         this.initParticles();
@@ -12,8 +17,12 @@ class ParticleVisualization extends AudioVisualization {
     draw() {
         // TODO: desenhar partículas
         this.clearCanvas();
-        this.drawParticles();
+        
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        this.ctx.fillRect = (0, 0, this.canvas.width, this.canvas.height);
+
         this.drawConnections();
+        this.drawParticles();
     }
     
     update() {
@@ -24,57 +33,103 @@ class ParticleVisualization extends AudioVisualization {
     
     getProperties() {
         // TODO: obter propriedades específicas
-        return super.getProperties();
+        return {
+            ...super.getProperties(),
+            ...this.properties
+        };
     }
     
     initParticles() {
+        this.particles = [];
+        const count = this.properties.particleCount;
         // TODO: inicializar partículas
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < count; i++) {
             this.particles.push({
                 x: Math.random() * this.canvas.width,
                 y: Math.random() * this.canvas.height,
                 vx: (Math.random() - 0.5) * 2,
                 vy: (Math.random() - 0.5) * 2,
-                radius: Math.random() * 3 + 1,
-                color: `hsl(${Math.random() * 360}, 100%, 50%)`
+                radius: Math.random() * 2.5 + 1.5,
+                baseRadius: Math.random() * 2.5 + 1.5,
+                hue: Math.random() * 360,
+                saturation: 80 + Math.random() * 20,
+                lightness: 50 + Math.random() * 20
             });
         }
     }
     
     updateParticles() {
         // TODO: atualizar estado das partículas
-        const data = this.audioProcessor.getFrequencyData();
-        const audioLevel = this.audioProcessor.calculateAudioLevel();
+        const data = this.audioProcessor ? this.audioProcessor.getFrequencyData() : this.testData;
+        const audioLevel = this.audioProcessor ? this.audioProcessor.calculateAudioLevel() : 0.5;
+
+        if (!data || data.length === 0) {
+            return;
+        }
+
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
         
         for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
-            const freqIndex = Math.floor((i / this.particles.length) * data-length);
+            const freqIndex = Math.floor((i / this.particles.length) * data.length);
             const intensity = data[freqIndex] / 255;
             
             // Mover partícula
-            p.vx += (Math.random() - 0.5) * intensity * 0.5;
-            p.vy += (Math.random() - 0.5) * intensity * 0.5;
+            const reactivity = this.properties.audioReactivity * 0.3;
+            p.vx += (Math.random() - 0.5) * intensity * reactivity;
+            p.vy += (Math.random() - 0.5) * intensity * reactivity;
             
-            const centerX = this.canvas.width / 2;
-            const centerY = this.canvas.height / 2;
-            const dx = p.x - centerX;
-            const dy = p.y - centerY;
+            const dx = centerX - p.x;
+            const dy = centerY - p.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance > 50) {
-                const force = intensity * 0.1;
-                p.vx -= (dx / distance) * force;
-                p.vy -= (dy / distance) * force;
+            const gravitaionalForce = 0.05;
+
+            if (distance > 10) {
+                p.vx += (dx / distance) * gravitaionalForce;
+                p.vy += (dy / distance) * gravitaionalForce;
+            }
+
+            if (audioLevel > 0.5 && distance < 150) {
+                const repulsiveForce = (audioLevel - 0.5) * 0.15;
+                p.vx -= (dx / distance) * repulsiveForce;
+                p.vy -= (dy / distance) * repulsiveForce;
             }
 
             p.x += p.vx;
             p.y += p.vy;
 
-            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -0.8;
-            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -0.8;
+            const margin = 20;
+            if (p.x < margin) {
+                p.x = margin;
+                p.vx = Math.abs(p.vx) * 0.7;
+            } else if (p.x > this.canvas.width - margin) {
+                p.x = this.canvas.width - margin;
+                p.vx = -Math.abs(p.vx) * 0.7;
+            }
 
-            p.vx *= 0.98;
-            p.vy *= 0.98;
+            if (p.y < margin) {
+                p.y = margin;
+                p.vy = Math.abs(p.vy) * 0.7;
+            } else if (p.y > this.canvas.height - margin) {
+                p.y = this.canvas.height - margin;
+                p.vy = -Math.abs(p.vy) * 0.7;
+            }
+
+
+            p.vx *= 0.95;
+            p.vy *= 0.95;
+
+            const maxSpeed = 3;
+            const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+            if (speed > maxSpeed) {
+                p.vx = (p.vx / speed) * maxSpeed;
+                p.vy = (p.vy / speed) * maxSpeed;
+            }
+
+            p.radius = p.baseRadius * (1 + intensity + 1.5);
+            p.hue = (p.hue + intensity * 0.5) % 360;
         }          
     }
     
@@ -83,14 +138,24 @@ class ParticleVisualization extends AudioVisualization {
         for (const p of this.particles) {
             this.ctx.beginPath();
             this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            this.ctx.fillStyle = p.color;
+
+            const gradient = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+            gradient.addColorStop(0, `hsla(${p.hue}, ${p.saturation}%, ${p.lightness + 20}%, 1)`);
+            gradient.addColorStop(1, `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, 0.6)`);
+
+            this.ctx.fillStyle = gradient;
             this.ctx.fill();
+
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = `hsl(${p.hue}, ${p.saturation}%, ${p.lightness}%)`;
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0;
         }
     }
     
     drawConnections() {
         // TODO: desenhar conexões entre partículas
-        const maxDistance = 100;
+        const maxDistance = this.properties.maxDistance;
         
         for (let i = 0; i < this.particles.length; i++) {
             for (let j = i + 1; j < this.particles.length; j++) {
@@ -102,15 +167,30 @@ class ParticleVisualization extends AudioVisualization {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < maxDistance) {
-                    const opacity = 1 - distance / maxDistance;
+                    const opacity = (1 - distance / maxDistance) * 0.4;
+
+                    const avgHue = (p1.hue + p2.hue) / 2;
+
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1.x, p1.y);
                     this.ctx.lineTo(p2.x, p2.y);
-                    this.ctx.strokeStyle = `rgba(76, 201, 240, ${opacity * 0.5})`;
+                    this.ctx.strokeStyle = `hsla(${avgHue}, 70%, 60%, ${opacity})`;
                     this.ctx.lineWidth = 1;
                     this.ctx.stroke();
                 }
             }
+        }
+    }
+
+    resize(width, height) {
+        super.resize(width, height);
+
+        const scaleX = width / this.canvas.width;
+        const scaleY = height / this.canvas.height;
+
+        for (const p of this.particles) {
+            p.x *= scaleX;
+            p.y *= scaleY;
         }
     }
 
@@ -120,7 +200,9 @@ class ParticleVisualization extends AudioVisualization {
 
         for (let i = 0; i < data.length; i++) {
             const baseFreq = (i / data.length) * 10;
-            data[i] = Math.floor((Math.sin(time +  baseFreq) * 0.5 + 0.5) * 255);
+            const wave1 = Math.sin(time + baseFreq) * 0.5 + 0.5;
+            const wave2 = Math.sin(time * 0.5 + baseFreq * 2) * 0.3 + 0.3;
+            data[i] = Math.floor((wave1 * 0.7 + wave2 * 0.3) * 255);
         }
         return data;
     }

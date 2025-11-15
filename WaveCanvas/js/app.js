@@ -6,7 +6,7 @@ class App {
         this.uiManager = new UIManager(this);
         this.exportManager = new ExportManager(this.visualizationEngine);
 
-        this.states= {
+        this.states = {
             INITIALIZING: 'initializing',
             READY: 'ready',
             LOADING_AUDIO: 'loading_audio',

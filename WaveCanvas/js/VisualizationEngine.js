@@ -3,7 +3,7 @@ class VisualizationEngine {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
-            throw new Error(`Canvas com ID  '${canvasID}' não encontrado`);
+            throw new Error(`Canvas com ID  '${canvasId}' não encontrado`);
         }
         this.ctx = this.canvas.getContext('2d');
         this.visualizations = new Map();
@@ -77,7 +77,7 @@ class VisualizationEngine {
     animate() {
         if (!this.isRunning) return;
 
-        if (!this.audioProcessor) {
+        if (this.audioProcessor) {
             this.audioProcessor.update();
         }
 

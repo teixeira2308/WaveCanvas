@@ -191,5 +191,9 @@ class AudioProcessor {
         this.analyser.connect(this.audioContext.destination);
     }
 
+    isRunning() {
+        return this.isPlaying;
+    }
+
 
 }

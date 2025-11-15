@@ -22,7 +22,7 @@ class App {
     setState(newState) {
         console.log(`Estado: ${this.currentState} -> ${newState}`);
         this.currentState = newState;
-        //this.updateUIForState();
+        this.updateUIForState();
     }
     
     init() {
@@ -89,6 +89,13 @@ class App {
         this.stopAudio();
         this.visualizationEngine.stop();
         console.log('Aplicação destruída');
+    }
+
+    updateUIForState() {
+        const statusElement = document.getElementById('audioStatus');
+        if (statusElement) {
+            statusElement.textContent = `Estado: ${this.currentState}`;
+        }
     }
     
 }

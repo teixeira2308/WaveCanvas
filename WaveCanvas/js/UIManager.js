@@ -125,4 +125,10 @@ class UIManager {
         
         return container;
     }
+    updateLevelBars(level) {
+        const levelBar = document.getElementById('audioLevelBar');
+        if (levelBar) {
+            levelBar.style.width = `${level * 100}%`;
+        }
+    }
 }

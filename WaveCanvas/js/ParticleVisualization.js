@@ -43,37 +43,39 @@ class ParticleVisualization extends AudioVisualization {
     
     updateParticles() {
         // TODO: atualizar estado das partículas
-        const data = this.audioProcessor ? this.audioProcessor.getFrequencyData() : this.testData;
-        const audioLevel = this.audioProcessor ? this.audioProcessor.calculateAudioLevel() : 0.5;
+        const data = this.audioProcessor.getFrequencyData();
+        const audioLevel = this.audioProcessor.calculateAudioLevel();
         
         for (let i = 0; i < this.particles.length; i++) {
             const p = this.particles[i];
+            const freqIndex = Math.floor((i / this.particles.length) * data-length);
+            const intensity = data[freqIndex] / 255;
             
             // Mover partícula
+            p.vx += (Math.random() - 0.5) * intensity * 0.5;
+            p.vy += (Math.random() - 0.5) * intensity * 0.5;
+            
+            const centerX = this.canvas.width / 2;
+            const centerY = this.canvas.height / 2;
+            const dx = p.x - centerX;
+            const dy = p.y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 50) {
+                const force = intensity * 0.1;
+                p.vx -= (dx / distance) * force;
+                p.vy -= (dy / distance) * force;
+            }
+
             p.x += p.vx;
             p.y += p.vy;
-            
-            // Rebater nas bordas
-            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
-            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
-            
-            // Aplicar influência do áudio
-            if (data.length > 0) {
-                const freqIndex = Math.floor(i / this.particles.length * data.length);
-                const intensity = data[freqIndex] / 255;
-                
-                p.vx += (Math.random() - 0.5) * intensity * 0.5;
-                p.vy += (Math.random() - 0.5) * intensity * 0.5;
-                
-                // Limitar velocidade
-                const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-                const maxSpeed = 2 + audioLevel * 3;
-                if (speed > maxSpeed) {
-                    p.vx = (p.vx / speed) * maxSpeed;
-                    p.vy = (p.vy / speed) * maxSpeed;
-                }
-            }
-        }
+
+            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -0.8;
+            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -0.8;
+
+            p.vx *= 0.98;
+            p.vy *= 0.98;
+        }          
     }
     
     drawParticles() {
@@ -110,5 +112,16 @@ class ParticleVisualization extends AudioVisualization {
                 }
             }
         }
+    }
+
+    get testData() {
+        const data = new Uint8Array(256);
+        const time = this.frameCount * 0.05;
+
+        for (let i = 0; i < data.length; i++) {
+            const baseFreq = (i / data.length) * 10;
+            data[i] = Math.floor((Math.sin(time +  baseFreq) * 0.5 + 0.5) * 255);
+        }
+        return data;
     }
 }

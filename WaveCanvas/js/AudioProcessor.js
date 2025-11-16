@@ -125,16 +125,22 @@ class AudioProcessor {
             this.mediaStream = null;
         }
 
-        if (this.source && this.source.stop) {
-            this.source.stop();
+         if (this.source) {
+            if (this.source.stop) {
+                this.source.stop();
+            }
             this.source.disconnect();
             this.source = null;
         }
-
+        /*
         if (this.audioContext) {
             this.audioContext.suspend();
         }
+        */
         this.isPlaying = false;
+        
+
+
     }
     
     update() {
@@ -173,6 +179,8 @@ class AudioProcessor {
         for (let i = 0; i < this.frequencyData.length; i++) {
             sum += this.frequencyData[i];
         }
+
+        console.log(this.frequencyData);
         return sum / (this.frequencyData.length * 255);
     }
 

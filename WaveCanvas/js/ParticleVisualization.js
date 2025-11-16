@@ -5,9 +5,10 @@ class ParticleVisualization extends AudioVisualization {
         this.particles = [];
         this.lastTime = 0;
         this.properties = {
-            particleCount: 100,
-            maxDistance: 120,
-            audioReactivity: 1.5
+            particleCount: 50,
+            maxDistance: 200,
+            audioReactivity: 1.5,
+            minVelocity: 0.1
         };
         
         // Inicializar partículas
@@ -49,8 +50,8 @@ class ParticleVisualization extends AudioVisualization {
                 y: Math.random() * this.canvas.height,
                 vx: (Math.random() - 0.5) * 2,
                 vy: (Math.random() - 0.5) * 2,
-                radius: Math.random() * 2.5 + 1.5,
-                baseRadius: Math.random() * 2.5 + 1.5,
+                radius: Math.random() * 10 + 1.5,
+                baseRadius: Math.random() * 10 + 1.5,
                 hue: Math.random() * 360,
                 saturation: 80 + Math.random() * 20,
                 lightness: 50 + Math.random() * 20
@@ -59,74 +60,97 @@ class ParticleVisualization extends AudioVisualization {
     }
     
     updateParticles() {
-        // TODO: atualizar estado das partículas
-        const data = this.audioProcessor ? this.audioProcessor.getFrequencyData() : this.testData;
-        const audioLevel = this.audioProcessor ? this.audioProcessor.calculateAudioLevel() : 0.5;
+    const data = this.audioProcessor ? this.audioProcessor.getFrequencyData() : this.testData;
+    const audioLevel = this.audioProcessor ? this.audioProcessor.calculateAudioLevel() : 0.5;
 
-        if (!data || data.length === 0) {
-            return;
+    if (!data || data.length === 0) {
+        return;
+    }
+
+    const centerX = this.canvas.width / 2;
+    const centerY = this.canvas.height / 2;
+    
+    for (let i = 0; i < this.particles.length; i++) {
+        const p = this.particles[i];
+        const freqIndex = Math.floor((i / this.particles.length) * data.length);
+        const intensity = data[freqIndex] / 255;
+        
+        // Apply audio-driven movement with individual variation
+        const reactivity = this.properties.audioReactivity * (p.movementFactor || 1.0);
+        
+        // More varied and stronger random forces
+        p.vx += (Math.random() - 0.5) * intensity * reactivity ;
+        p.vy += (Math.random() - 0.5) * intensity * reactivity;
+        
+        // Center repulsion - FIXED LOGIC
+        const dx = p.x - centerX;
+        const dy = p.y - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Only apply repulsion when close to center and audio is active
+        if (audioLevel > 0.1 && distance < 150) {
+            const repulsiveForce = (audioLevel * 0.5) / (distance + 1);
+            p.vx += (dx / distance) * repulsiveForce;
+            p.vy += (dy / distance) * repulsiveForce;
         }
 
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        // Update position
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Boundary handling with bounce
+        const margin = 30;
+        let bounced = false;
         
-        for (let i = 0; i < this.particles.length; i++) {
-            const p = this.particles[i];
-            const freqIndex = Math.floor((i / this.particles.length) * data.length);
-            const intensity = data[freqIndex] / 255;
-            
-            // Mover partícula
-            const reactivity = this.properties.audioReactivity * 3.0;
-            p.vx += (Math.random() - 0.5) * intensity * reactivity;
-            p.vy += (Math.random() - 0.5) * intensity * reactivity;
-            
-            const dx = centerX - p.x;
-            const dy = centerY - p.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
+        if (p.x < margin) {
+            p.x = margin;
+            p.vx = Math.abs(p.vx) * 0.8;
+            bounced = true;
+        } else if (p.x > this.canvas.width - margin) {
+            p.x = this.canvas.width - margin;
+            p.vx = -Math.abs(p.vx) * 0.8;
+            bounced = true;
+        }
 
+        if (p.y < margin) {
+            p.y = margin;
+            p.vy = Math.abs(p.vy) * 0.8;
+            bounced = true;
+        } else if (p.y > this.canvas.height - margin) {
+            p.y = this.canvas.height - margin;
+            p.vy = -Math.abs(p.vy) * 0.8;
+            bounced = true;
+        }
 
-            if (audioLevel > 0.2 && distance < 200) {
-                const repulsiveForce = (audioLevel - 0.2) * 0.8;
-                p.vx -= (dx / distance) * repulsiveForce;
-                p.vy -= (dy / distance) * repulsiveForce;
-            }
+        // Apply damping (less aggressive)
+        p.vx *= 0.98;
+        p.vy *= 0.98;
 
-            p.x += p.vx;
-            p.y += p.vy;
+        // ENFORCE MINIMUM VELOCITY - THIS IS KEY!
+        const currentSpeed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        const minVelocity = 0.05;
+        if (currentSpeed < minVelocity && !bounced) {
+            const angle = Math.random() * Math.PI * 2;
+            p.vx += Math.cos(angle) * minVelocity;
+            p.vy += Math.sin(angle) * minVelocity;
 
-            const margin = 20;
-            if (p.x < margin) {
-                p.x = margin;
-                p.vx = Math.abs(p.vx) * 0.7;
-            } else if (p.x > this.canvas.width - margin) {
-                p.x = this.canvas.width - margin;
-                p.vx = -Math.abs(p.vx) * 0.7;
-            }
+        }
 
-            if (p.y < margin) {
-                p.y = margin;
-                p.vy = Math.abs(p.vy) * 0.7;
-            } else if (p.y > this.canvas.height - margin) {
-                p.y = this.canvas.height - margin;
-                p.vy = -Math.abs(p.vy) * 0.7;
-            }
+        // Limit maximum speed
+        const maxSpeed = 8;
+        if (currentSpeed > maxSpeed) {
+            p.vx = (p.vx / currentSpeed) * maxSpeed;
+            p.vy = (p.vy / currentSpeed) * maxSpeed;
 
+        }
 
-            p.vx *= 0.96;
-            p.vy *= 0.96;
+        // Visual effects
+        p.radius = p.baseRadius * (1 + intensity * 2);
+        p.hue = (p.hue + intensity * 2) % 360;
 
-            const maxSpeed = 6;
-            const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-            if (speed > maxSpeed) {
-                p.vx = (p.vx / speed) * maxSpeed;
-                p.vy = (p.vy / speed) * maxSpeed;
-            }
+    }          
+}
 
-            p.radius = p.baseRadius * (1 + intensity * 1.5);
-            p.hue = (p.hue + intensity * 0.5) % 360;
-        }          
-    }
-    
     drawParticles() {
         // TODO: desenhar partículas
         for (const p of this.particles) {
@@ -187,7 +211,6 @@ class ParticleVisualization extends AudioVisualization {
             p.y *= scaleY;
         }
     }
-
     get testData() {
         const data = new Uint8Array(256);
         const time = this.frameCount * 0.05;

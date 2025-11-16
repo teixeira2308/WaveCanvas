@@ -7,6 +7,7 @@ class UIManager {
         
         // Inicializar interface
         this.setupEventListeners();
+        this.setupAudioLevels();
     }
     
     updatePropertiesPanel() {
@@ -94,7 +95,11 @@ class UIManager {
             if (this.audioProcessor.isRunning()) {
                 const level = this.audioProcessor.calculateAudioLevel();
                 this.updateLevelBars(level);
-                this.updateAudioInfo(`Nível: ${Math.round(level * 100)}%`);
+                
+                const audioLevel = document.getElementById('audioLevel');
+                if (audioLevel) {
+                    audioLevel.textContent = `Nível: ${Math.round(level * 100)}%`;
+                }
             }
         }, 100);
     }

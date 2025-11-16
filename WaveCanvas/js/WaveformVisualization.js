@@ -17,7 +17,7 @@ class WaveformVisualization extends AudioVisualization {
 
         if (this.properties.showCenterLine) {
             this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            this.ctx.lineWidth = 1,
+            this.ctx.lineWidth = 1;
             this.ctx.beginPath();
             this.ctx.moveTo(0, this.canvas.height/2);
             this.ctx.lineTo(this.canvas.width, this.canvas.height / 2);

@@ -4,6 +4,8 @@ class AudioProcessor {
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             this.setupAnalyser();
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.gain.value = 2.5;
         } catch (error) {
             console.error('Web Audio API não suportada:', error);
             throw new Error('Navegador não suporta Web Audio API');
@@ -28,7 +30,7 @@ class AudioProcessor {
         this.analyser.fftSize = 2048;
         this.analyser.smoothingTimeConstant = 0.8;
         this.analyser.minDecibels = -90;
-        this.analyser.maxDecibels = -10;
+        this.analyser.maxDecibels = -20;
 
         const bufferLength = this.analyser.frequencyBinCount;
         this.frequencyData = new Uint8Array(bufferLength);
@@ -48,9 +50,9 @@ class AudioProcessor {
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true,
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false,
                     channelCount: 1,
                 }
             });
@@ -187,7 +189,8 @@ class AudioProcessor {
             //source.connect(this.analyser);
             this.source = source;
         }
-        this.source.connect(this.analyser);
+        this.source.connect(this.gainNode);
+        this.gainNode.connect(this.analyser);
         this.analyser.connect(this.audioContext.destination);
     }
 

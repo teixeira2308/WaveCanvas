@@ -19,7 +19,7 @@ class ParticleVisualization extends AudioVisualization {
         this.clearCanvas();
         
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-        this.ctx.fillRect = (0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.drawConnections();
         this.drawParticles();
@@ -76,7 +76,7 @@ class ParticleVisualization extends AudioVisualization {
             const intensity = data[freqIndex] / 255;
             
             // Mover partícula
-            const reactivity = this.properties.audioReactivity * 0.3;
+            const reactivity = this.properties.audioReactivity * 3.0;
             p.vx += (Math.random() - 0.5) * intensity * reactivity;
             p.vy += (Math.random() - 0.5) * intensity * reactivity;
             
@@ -84,15 +84,9 @@ class ParticleVisualization extends AudioVisualization {
             const dy = centerY - p.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            const gravitaionalForce = 0.05;
 
-            if (distance > 10) {
-                p.vx += (dx / distance) * gravitaionalForce;
-                p.vy += (dy / distance) * gravitaionalForce;
-            }
-
-            if (audioLevel > 0.5 && distance < 150) {
-                const repulsiveForce = (audioLevel - 0.5) * 0.15;
+            if (audioLevel > 0.2 && distance < 200) {
+                const repulsiveForce = (audioLevel - 0.2) * 0.8;
                 p.vx -= (dx / distance) * repulsiveForce;
                 p.vy -= (dy / distance) * repulsiveForce;
             }
@@ -118,17 +112,17 @@ class ParticleVisualization extends AudioVisualization {
             }
 
 
-            p.vx *= 0.95;
-            p.vy *= 0.95;
+            p.vx *= 0.96;
+            p.vy *= 0.96;
 
-            const maxSpeed = 3;
+            const maxSpeed = 6;
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
             if (speed > maxSpeed) {
                 p.vx = (p.vx / speed) * maxSpeed;
                 p.vy = (p.vy / speed) * maxSpeed;
             }
 
-            p.radius = p.baseRadius * (1 + intensity + 1.5);
+            p.radius = p.baseRadius * (1 + intensity * 1.5);
             p.hue = (p.hue + intensity * 0.5) % 360;
         }          
     }

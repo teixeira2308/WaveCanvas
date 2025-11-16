@@ -95,7 +95,7 @@ class VisualizationEngine {
         }
 
         if (this.currentVisualization) {
-            if (!this.currentVisualization.ctx && typeof this.currentVisualization.ctx.fillRect !== 'function') {
+            if (!this.currentVisualization.ctx || typeof this.currentVisualization.ctx.fillRect !== 'function') {
                 console.error('Contexto inválido, reestabelecendo...');
                 this.currentVisualization.canvas = this.canvas;
                 this.currentVisualization.ctx = this.canvas.getContext('2d');

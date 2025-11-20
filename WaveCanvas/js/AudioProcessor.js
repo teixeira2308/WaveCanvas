@@ -193,13 +193,15 @@ class AudioProcessor {
             const mediaSource = this.audioContext.createMediaStreamSource(source);
             //mediaSource.connect(this.analyser);
             this.source = mediaSource;
+            this.source.connect(this.gainNode);
+            this.gainNode.connect(this.analyser);
         } else {
             //source.connect(this.analyser);
             this.source = source;
+            this.source.connect(this.gainNode);
+            this.gainNode.connect(this.analyser);
+            this.gainNode.connect(this.audioContext.destination);
         }
-        this.source.connect(this.gainNode);
-        this.gainNode.connect(this.analyser);
-        this.analyser.connect(this.audioContext.destination);
     }
 
     isRunning() {

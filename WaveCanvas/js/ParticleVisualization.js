@@ -102,6 +102,7 @@ class ParticleVisualization extends AudioVisualization {
         const margin = 30;
         let bounced = false;
         
+<<<<<<< HEAD
         if (p.x < margin) {
             p.x = margin;
             p.vx = Math.abs(p.vx) * 0.8;
@@ -125,6 +126,26 @@ class ParticleVisualization extends AudioVisualization {
         // Apply damping (less aggressive)
         p.vx *= 0.98;
         p.vy *= 0.98;
+=======
+        for (let i = 0; i < this.particles.length; i++) {
+            const p = this.particles[i];
+            const freqIndex = Math.floor((i / this.particles.length) * data.length);
+            const intensity = data[freqIndex] / 255;
+
+            // Mover partícula
+            const reactivity = this.properties.audioReactivity * 3.0;
+            p.vx += (Math.random() - 0.5) * intensity * reactivity;
+            p.vy += (Math.random() - 0.5) * intensity * reactivity;
+            
+            const dx = centerX - p.x;
+            const dy = centerY - p.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (audioLevel > 0.2 && distance < 200) {
+                p.vx -= (dx / distance);
+                p.vy -= (dy / distance);
+            }
+>>>>>>> 4f4254b (ball)
 
         // ENFORCE MINIMUM VELOCITY - THIS IS KEY!
         const currentSpeed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
@@ -134,6 +155,7 @@ class ParticleVisualization extends AudioVisualization {
             p.vx += Math.cos(angle) * minVelocity;
             p.vy += Math.sin(angle) * minVelocity;
 
+<<<<<<< HEAD
         }
 
         // Limit maximum speed
@@ -147,6 +169,10 @@ class ParticleVisualization extends AudioVisualization {
         // Visual effects
         p.radius = p.baseRadius * (1 + intensity * 2);
         p.hue = (p.hue + intensity * 2) % 360;
+=======
+            p.vx *= 0.96;
+            p.vy *= 0.96;
+>>>>>>> 4f4254b (ball)
 
     }          
 }

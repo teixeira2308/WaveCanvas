@@ -25,6 +25,7 @@ class VisualizationEngine {
         this.visualizations.set('spectrum', new SpectrumVisualization(this.canvas, null));
         this.visualizations.set('waveform', new WaveformVisualization(this.canvas, null));
         this.visualizations.set('particles', new ParticleVisualization(this.canvas, null));
+        this.visualizations.set('ball', new BallVisualization(this.canvas, null));
 
         this.setVisualization('spectrum');
     }
@@ -113,7 +114,6 @@ class VisualizationEngine {
     }
     
     resize() {
-        // TODO: redimensionar canvas
         const container = this.canvas.parentElement;
         if (container) {
             this.canvas.width = container.clientWidth;

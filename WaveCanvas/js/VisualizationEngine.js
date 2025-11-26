@@ -86,6 +86,8 @@ class VisualizationEngine {
             this.animationId = null;
         }
         console.log('Motor de visualização parado');
+        
+        this.currentVisualization.clearCanvas();
     }
 
     animate() {
@@ -112,8 +114,16 @@ class VisualizationEngine {
 
         this.animationId = requestAnimationFrame(() => this.animate());
     }
-    
+
     resize() {
+        if (document.fullscreenElement) {
+            this.resizeFullscreen();
+        } else {
+            this.resizeNormal();
+        }
+    }
+    
+    resizeNormal() {
         const container = this.canvas.parentElement;
         if (container) {
             this.canvas.width = container.clientWidth;
@@ -130,6 +140,23 @@ class VisualizationEngine {
                 this.currentVisualization.ctx = this.canvas.getContext('2d');
                 this.currentVisualization.resize(this.canvas.width, this.canvas.height);
             }
+        }
+    }
+
+    resizeFullscreen() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+
+        for (const [key, viz] of this.visualizations) {
+            viz.canvas = this.canvas;
+            viz.ctx = this.canvas.getContext('2d');
+            viz.resize(this.canvas.width, this.canvas.height);
+        }
+
+        if(this.currentVisualization) {
+            this.currentVisualization.canvas = this.canvas;
+            this.currentVisualization.ctx = this.canvas.getContext('2d');
+            this.currentVisualization.resize(this.canvas.width, this.canvas.height);
         }
     }
     

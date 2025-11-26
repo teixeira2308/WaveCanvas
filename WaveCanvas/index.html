@@ -43,13 +43,23 @@
                 <div id="audioInfo">
                     <p id="audioStatus">Áudio: Parado</p>
                     <p id="audioLevel">Nível: 0%</p>
+                    <button id="fullscreenBtn" class="btn-primary">Fullscreen</button>
+                    <button id="resetViewBtn" class="btn-secondary hidden">Sair da Fullscreen</button>
                 </div>
             </section>
             
             <section id="properties-panel">
                 <h3>Propriedades da Visualização</h3>
                 <div id="properties-container">
-                    <!-- Propriedades dinâmicas serão inseridas aqui -->
+                    <div id="color-container">
+                        <label for="colorPicker">Cor:</label>
+                        <input type="color" id="colorPicker" value="#4cc9f0">
+                    </div>
+
+                    <div id="background-color-container">
+                        <label for="backgroundColorPicker">Cor de Fundo:</label>
+                        <input type="color" id="backgroundColorPicker" value="#000000">
+                    </div>
                 </div>
             </section>
         </main>

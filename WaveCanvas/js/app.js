@@ -7,11 +7,11 @@ class App {
         this.exportManager = new ExportManager(this.visualizationEngine);
 
         this.states = {
-            INITIALIZING: 'initializing',
-            READY: 'ready',
-            LOADING_AUDIO: 'loading_audio',
-            PLAYING: 'playing',
-            ERROR: 'error'
+            INITIALIZING: 'a inicializar',
+            READY: 'pronto',
+            LOADING_AUDIO: 'carregar_audio',
+            PLAYING: 'a tocar',
+            ERROR: 'erro'
         };
         this.currentState = this.states.INITIALIZING;
         

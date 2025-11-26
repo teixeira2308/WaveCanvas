@@ -87,6 +87,70 @@ class UIManager {
         document.getElementById('exportJPEG').addEventListener('click', () => {
             this.app.exportManager.exportAsJPEG(0.9);
         });
+
+        document.getElementById('resetViewBtn').style.display = "none";
+
+        document.getElementById('fullscreenBtn').addEventListener('click', () => {
+            this.enterFullscreen();
+            this.app.visualizationEngine.resizeFullscreen();
+        });
+
+        document.getElementById('resetViewBtn').addEventListener('click', () => {
+            this.exitFullscreen();
+            this.app.visualizationEngine.resizeNormal();
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            this.onFullscreenChange();
+        });
+        
+
+    }
+
+    enterFullscreen() {
+        const visualizationArea = document.getElementById('visualization-area');
+        if (visualizationArea.requestFullscreen) {
+            visualizationArea.requestFullscreen();
+        } else if (visualizationArea.webkitRequestFullscreen) { 
+            visualizationArea.webkitRequestFullscreen();
+        } 
+
+        document.getElementById('fullscreenBtn').style.display = "none";
+        document.getElementById('resetViewBtn').style.display = "block";
+    }
+
+    exitFullscreen() {
+        if (document.existFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+
+    onFullscreenChange() {
+        const isFullscreen = !!document.fullscreenElement;
+
+        if (!isFullscreen) {
+            document.getElementById('resetViewBtn').style.display = "none";
+            document.getElementById('fullscreenBtn').style.display = "block";
+        } else {
+            document.getElementById('fullscreenBtn').style.display = "none";
+            document.getElementById('rearViewBtn').style.display = "block";
+        }
+    }
+
+
+    toggleFullscreenButtons() {
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const resetViewBtn = document.getElementById('resetViewBtn');
+        const canvas = document.getElementById('audioCanvas');
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (canvas.requestFullscreen) canvas.requestFullscreen();
+            else if (canvas.webkitRequestFullscreen) canvas.webkitRequestFullscreen();
+
+            resetViewBtn.style.display = "block";
+        });
     }
     
     setupAudioLevels() {

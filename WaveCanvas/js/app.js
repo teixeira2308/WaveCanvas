@@ -28,6 +28,7 @@ class App {
     init() {
         // TODO: inicializar a aplicação
         this.setState(this.states.READY);
+        this.uiManager.updatePropertiesPanel();
         console.log('App inicializada');
     }
     
@@ -75,7 +76,12 @@ class App {
         // TODO: definir tipo de visualização
         if (this.visualizationEngine.setVisualization(type)) {
             console.log(`Definindo visualização: ${type}`);
+
+            this.uiManager.updatePropertiesPanel();
         }
+
+        
+        
         return this.visualizationEngine.setVisualization(type);
     }
     

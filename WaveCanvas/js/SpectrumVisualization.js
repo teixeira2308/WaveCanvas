@@ -58,14 +58,38 @@ class SpectrumVisualization extends AudioVisualization {
     }
     
     getProperties() {
-        // TODO: obter propriedades específicas
         return {
-            ...super.getProperties(),
-            barWidth: this.properties.barWidth, 
-            colorScheme: this.properties.colorScheme,
-            showGrid: this.properties.showGrid,
-            sensitivity: this.properties.sensitivity,
-            smoothing: this.properties.smoothing
+            name: this.name,
+            barWidth: {
+                value: this.properties.barWidth,
+                min: 1,
+                max: 10,
+                step: 0.5,
+                type: 'range'
+            },
+            sensitivity: {
+                value: this.properties.sensitivity,
+                min: 0.1,
+                max: 3.0,
+                step: 0.1,
+                type: 'range'
+            },
+            smoothing: {
+                value: this.properties.smoothing,
+                min: 0.1,
+                max: 0.9,
+                step: 0.05,
+                type: 'range'
+            },
+            showGrid: {
+                value: this.properties.showGrid,
+                type: 'boolean'
+            },
+            colorScheme: {
+                value: this.properties.colorScheme,
+                options: ['rainbow', 'blue', 'red', 'green', 'monochrome'],
+                type: 'select'
+            }
         };
     }
 

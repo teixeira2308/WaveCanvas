@@ -51,8 +51,31 @@ class WaveformVisualization extends AudioVisualization {
     }
     
     getProperties() {
-        // TODO: obter propriedades específicas
-        return super.getProperties();
+        return {
+            name: this.name,
+            lineWidth: {
+                value: this.properties.lineWidth,
+                min: 1,
+                max: 10,
+                step: 0.5,
+                type: 'range'
+            },
+            amplitude: {
+                value: this.properties.amplitude,
+                min: 0.1,
+                max: 3.0,
+                step: 0.1,
+                type: 'range'
+            },
+            showCenterLine: {
+                value: this.properties.showCenterLine,
+                type: 'boolean'
+            },
+            lineColor: {
+                value: this.properties.lineColor,
+                type: 'color'
+            }
+        };
     }
 
     get testData() {
@@ -72,10 +95,5 @@ class WaveformVisualization extends AudioVisualization {
         return data;
     }
 
-    getProperties() {
-        return {
-            ...super.getProperties(),
-            ...this.properties
-        };
-    }
+   
 }

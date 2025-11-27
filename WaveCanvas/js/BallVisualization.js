@@ -10,7 +10,7 @@ class BallVisualization extends AudioVisualization {
             sensitivity: 1.0,
             smoothing: 0.8,
             radius: 100,
-            ballColor: '#4cc9f0'
+            color: '#4cc9f0'
         };
     }
 
@@ -64,7 +64,7 @@ class BallVisualization extends AudioVisualization {
             }
         }
 
-        this.ctx.strokeStyle = this.properties.ballColor;
+        this.ctx.strokeStyle = this.properties.color;
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, baseRadius, 0, 2 * Math.PI);
@@ -87,16 +87,6 @@ class BallVisualization extends AudioVisualization {
         }
     }
 
-    getProperties() {
-        return {
-            ...super.getProperties(),
-            barWidth: this.properties.barWidth,
-            colorScheme: this.properties.colorScheme,
-            showGrid: this.properties.showGrid,
-            sensitivity: this.properties.sensitivity,
-            smoothing: this.properties.smoothing
-        };
-    }
 
     update() {
         super.update();

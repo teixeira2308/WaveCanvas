@@ -33,10 +33,29 @@ class ParticleVisualization extends AudioVisualization {
     }
     
     getProperties() {
-        // TODO: obter propriedades específicas
         return {
-            ...super.getProperties(),
-            ...this.properties
+            name: this.name,
+            particleCount: {
+                value: this.properties.particleCount,
+                min: 10,
+                max: 200,
+                step: 5,
+                type: 'range'
+            },
+            audioReactivity: {
+                value: this.properties.audioReactivity,
+                min: 0.1,
+                max: 5.0,
+                step: 0.1,
+                type: 'range'
+            },
+            maxDistance: {
+                value: this.properties.maxDistance,
+                min: 50,
+                max: 1000,
+                step: 10,
+                type: 'range'
+            }
         };
     }
     

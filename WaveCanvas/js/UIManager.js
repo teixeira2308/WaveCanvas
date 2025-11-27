@@ -13,6 +13,114 @@ class UIManager {
     updatePropertiesPanel() {
         // TODO: atualizar painel de propriedades
         console.log('Atualizando painel de propriedades...');
+
+        const propertiesContainer = document.getElementById('properties-container');
+        const properties  = this.visualizationEngine.getVisualizationProperties();
+        
+        Object.keys(properties).forEach(propertyName => {
+            const property = properties[propertyName];
+            // Ignorar propriedades que não são objetos com type (como 'name')
+            if (property && typeof property === 'object' && property.type) {
+                const control = this.createPropertyControl(
+                    propertyName, 
+                    property.value, 
+                    property.min, 
+                    property.max, 
+                    property.step
+                );
+                if (control) {
+                    propertiesContainer.appendChild(control);
+                }
+            }
+        });
+    }
+
+    createPropertyControl(property, value, min, max, step) {
+         // TODO: criar controlo de propriedade
+    const container = document.createElement('div');
+    container.className = 'property-control';
+    
+    const label = document.createElement('label');
+    label.textContent = property;
+    label.htmlFor = `prop-${property}`;
+    
+    // Obter propriedades completas para verificar o tipo
+    const properties = this.visualizationEngine.getVisualizationProperties();
+    const propertyConfig = properties[property];
+    
+    let input;
+    
+    if (propertyConfig && propertyConfig.type === 'select') {
+        // Criar dropdown para propriedades do tipo select
+        input = document.createElement('select');
+        input.id = `prop-${property}`;
+        
+        propertyConfig.options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
+            if (option === propertyConfig.value) {
+                optionElement.selected = true;
+            }
+            input.appendChild(optionElement);
+        });
+        
+        input.addEventListener('change', (e) => {
+            this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
+        });
+    }
+        else if (propertyConfig && propertyConfig.type === 'boolean') {
+        input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = `prop-${property}`;
+        input.checked = propertyConfig.value;
+        
+        input.addEventListener('change', (e) => {
+            this.visualizationEngine.updateVisualizationProperty(property, e.target.checked);
+        });
+        
+    } else if (propertyConfig && propertyConfig.type === 'color') {
+        input = document.createElement('input');
+        input.type = 'color';
+        input.id = `prop-${property}`;
+        input.value = propertyConfig.value;
+        
+        input.addEventListener('input', (e) => {
+            this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
+        });
+        
+        
+    } else {
+        // Criar range slider para propriedades numéricas
+        input = document.createElement('input');
+        input.type = 'range';
+        input.id = `prop-${property}`;
+        input.min = min || 0;
+        input.max = max || 100;
+        input.step = step || 1;
+        input.value = value;
+        
+        // Adicionar display do valor atual
+        const valueDisplay = document.createElement('span');
+        valueDisplay.className = 'property-value';
+        valueDisplay.textContent = value;
+        
+        input.addEventListener('input', (e) => {
+            const newValue = parseFloat(e.target.value);
+            this.visualizationEngine.updateVisualizationProperty(property, newValue);
+            valueDisplay.textContent = newValue.toFixed(step < 1 ? 2 : 0);
+        });
+        
+        container.appendChild(label);
+        container.appendChild(input);
+        container.appendChild(valueDisplay);
+        return container;
+    }
+    
+    container.appendChild(label);
+    container.appendChild(input);
+    
+    return container;
     }
     
     updateAudioInfo(info, isError = false) {
@@ -40,19 +148,16 @@ class UIManager {
     }
     
     showError(message) {
-        // TODO: mostrar mensagem de erro
         const errorModal = document.getElementById('errorModal');
         const errorMessage = document.getElementById('errorMessage');
         
         errorMessage.textContent = message;
         errorModal.classList.remove('hidden');
         
-        // Fechar modal ao clicar no X
         document.querySelector('.close').onclick = () => {
             errorModal.classList.add('hidden');
         };
         
-        // Fechar modal ao clicar fora
         window.onclick = (event) => {
             if (event.target === errorModal) {
                 errorModal.classList.add('hidden');
@@ -98,20 +203,6 @@ class UIManager {
             this.exitFullscreen();
         });
 
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const colorPicker = document.getElementById('colorPicker');
-            const backgroundPicker = document.getElementById('backgroundColorPicker');
-
-            colorPicker.addEventListener('input', () => {
-                console.log("Cor selecionada:", colorPicker.value);
-            });
-
-            backgroundPicker.addEventListener('input', () => {
-                console.log("Cor de fundo selecionada:", backgroundPicker.value);
-            });
-        });
-
         document.addEventListener('fullscreenchange', () => {
             this.onFullscreenChange();
         });
@@ -124,7 +215,7 @@ class UIManager {
             this.onFullscreenChange();
         });
         
-
+       this.updatePropertiesPanel();
     }
 
     receiveColor() {
@@ -197,33 +288,7 @@ class UIManager {
             }
         }, 100);
     }
-    
-    createPropertyControl(property, value, min, max, step) {
-        // TODO: criar controlo de propriedade
-        const container = document.createElement('div');
-        container.className = 'property-control';
-        
-        const label = document.createElement('label');
-        label.textContent = property;
-        label.htmlFor = `prop-${property}`;
-        
-        const input = document.createElement('input');
-        input.type = 'range';
-        input.id = `prop-${property}`;
-        input.min = min;
-        input.max = max;
-        input.step = step;
-        input.value = value;
-        
-        input.addEventListener('input', (e) => {
-            this.visualizationEngine.updateVisualizationProperty(property, parseFloat(e.target.value));
-        });
-        
-        container.appendChild(label);
-        container.appendChild(input);
-        
-        return container;
-    }
+
     updateLevelBars(level) {
         const levelBar = document.getElementById('audioLevelBar');
         if (levelBar) {

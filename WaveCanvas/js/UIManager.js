@@ -15,10 +15,13 @@ class UIManager {
         console.log('Atualizando painel de propriedades...');
 
         const propertiesContainer = document.getElementById('properties-container');
+        propertiesContainer.innerHTML = ' ';
+
         const properties  = this.visualizationEngine.getVisualizationProperties();
         
         Object.keys(properties).forEach(propertyName => {
             const property = properties[propertyName];
+            console.log (property);
             // Ignorar propriedades que não são objetos com type (como 'name')
             if (property && typeof property === 'object' && property.type) {
                 const control = this.createPropertyControl(
@@ -44,14 +47,12 @@ class UIManager {
     label.textContent = property;
     label.htmlFor = `prop-${property}`;
     
-    // Obter propriedades completas para verificar o tipo
     const properties = this.visualizationEngine.getVisualizationProperties();
     const propertyConfig = properties[property];
     
     let input;
     
     if (propertyConfig && propertyConfig.type === 'select') {
-        // Criar dropdown para propriedades do tipo select
         input = document.createElement('select');
         input.id = `prop-${property}`;
         
@@ -89,9 +90,7 @@ class UIManager {
             this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
         });
         
-        
     } else {
-        // Criar range slider para propriedades numéricas
         input = document.createElement('input');
         input.type = 'range';
         input.id = `prop-${property}`;
@@ -100,7 +99,6 @@ class UIManager {
         input.step = step || 1;
         input.value = value;
         
-        // Adicionar display do valor atual
         const valueDisplay = document.createElement('span');
         valueDisplay.className = 'property-value';
         valueDisplay.textContent = value;

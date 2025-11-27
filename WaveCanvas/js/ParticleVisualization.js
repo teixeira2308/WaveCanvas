@@ -8,7 +8,8 @@ class ParticleVisualization extends AudioVisualization {
             particleCount: 50,
             maxDistance: this.canvas.width / 1.5,
             audioReactivity: 1.5,
-            minVelocity: 0.1
+            minVelocity: 0.1,
+            colorScheme: "rainbow"
         };
         
         // Inicializar partículas
@@ -55,6 +56,11 @@ class ParticleVisualization extends AudioVisualization {
                 max: 1000,
                 step: 10,
                 type: 'range'
+            },
+            colorScheme: {
+                value: this.properties.colorScheme,
+                options: ['rainbow', 'blue', 'red', 'green', 'monochrome'],
+                type: 'select'    
             }
         };
     }
@@ -77,7 +83,6 @@ class ParticleVisualization extends AudioVisualization {
                 movementFactor: 0.5 + Math.random() * 1.5
             });
         }
-        console.log(this.canvas.width);
     }
     
     updateParticles() {
@@ -166,10 +171,28 @@ class ParticleVisualization extends AudioVisualization {
             this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
 
             const gradient = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-            gradient.addColorStop(0, `hsla(${p.hue}, ${p.saturation}%, ${p.lightness + 20}%, 1)`);
-            gradient.addColorStop(1, `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, 0.6)`);
 
-            this.ctx.fillStyle = gradient;
+            switch (this.properties.colorScheme){
+                case "rainbow":
+                    gradient.addColorStop(0, `hsla(${p.hue}, ${p.saturation}%, ${p.lightness + 20}%, 1)`);
+                    gradient.addColorStop(1, `hsla(${p.hue}, ${p.saturation}%, ${p.lightness}%, 0.6)`);
+
+                    this.ctx.fillStyle = gradient;
+                    break;
+                case "blue":
+                    this.ctx.fillStyle = `hsl(${235}, ${97}%, ${60}%)`;
+                    break;
+                case "red":
+                    this.ctx.fillStyle = `hsl(${0}, ${97}%, ${60}%)`;
+                    break;
+                case "green":
+                    this.ctx.fillStyle = `hsl(${101}, ${97}%, ${60}%)`;
+                    break;
+                case "monochrome":
+                    this.ctx.fillStyle = `hsl(${0}, ${0}%, ${60}%)`;
+                    break;
+            }
+           
             this.ctx.fill();
 
             this.ctx.shadowBlur = 10;
@@ -195,12 +218,30 @@ class ParticleVisualization extends AudioVisualization {
                 if (distance < maxDistance) {
                     const opacity = (1 - distance / maxDistance) * 0.4;
 
-                    const avgHue = (p1.hue + p2.hue) / 2;
-
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1.x, p1.y);
                     this.ctx.lineTo(p2.x, p2.y);
-                    this.ctx.strokeStyle = `hsla(${avgHue}, 70%, 60%, ${opacity})`;
+                    
+                    switch (this.properties.colorScheme){
+                        case "rainbow":
+                            const avgHue = (p1.hue + p2.hue) / 2;
+                            this.ctx.strokeStyle = `hsla(${avgHue}, 70%, 60%, ${opacity})`;
+                            break;
+                        case "blue":
+                            this.ctx.strokeStyle = `hsl(${235}, ${97}%, ${60}%, ${opacity})`;
+                            break;
+                        case "red":
+                            this.ctx.strokeStyle = `hsl(${0}, ${97}%, ${60}%, ${opacity})`;
+                            break;
+                        case "green":
+                            this.ctx.strokeStyle = `hsl(${101}, ${97}%, ${60}%, ${opacity})`;
+                            break;
+                        case "monochrome":
+                            this.ctx.strokeStyle = `hsl(${0}, ${0}%, ${60}%, ${opacity})`;
+                            break;
+                    }
+                    
+                    
                     this.ctx.lineWidth = 1;
                     this.ctx.stroke();
                 }

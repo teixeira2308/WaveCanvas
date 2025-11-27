@@ -5,7 +5,6 @@ class SpectrumVisualization extends AudioVisualization {
         this.name = 'Espectro de Frequências';
         this.smoothedData = new Array(1024).fill(0);
         this.properties = {
-            barWidth: 2,
             colorScheme: "rainbow",
             showGrid: true,
             sensitivity: 1.0,
@@ -38,8 +37,24 @@ class SpectrumVisualization extends AudioVisualization {
             const hue = (i / data.length) * 300;
             const saturation = 100;
             const lightness = 50 + (value * 20);
+            switch(this.properties.colorScheme){
+                case "rainbow":
+                    this.ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                    break;
+                case "blue":
+                    this.ctx.fillStyle = `hsl(${235}, ${97}%, ${60}%)`;
+                    break;
+                case "red":
+                    this.ctx.fillStyle = `hsl(${0}, ${97}%, ${60}%)`;
+                    break;
+                case "green":
+                    this.ctx.fillStyle = `hsl(${101}, ${97}%, ${60}%)`;
+                    break;
+                case "monochrome":
+                    this.ctx.fillStyle = `hsl(${0}, ${0}%, ${60}%)`;
+                    break;
+            }
             
-            this.ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
             this.ctx.fillRect(x, y, barWidth - 1, barHeight);
         }
     }
@@ -60,13 +75,6 @@ class SpectrumVisualization extends AudioVisualization {
     getProperties() {
         return {
             name: this.name,
-            barWidth: {
-                value: this.properties.barWidth,
-                min: 1,
-                max: 10,
-                step: 0.5,
-                type: 'range'
-            },
             sensitivity: {
                 value: this.properties.sensitivity,
                 min: 0.1,
@@ -77,7 +85,7 @@ class SpectrumVisualization extends AudioVisualization {
             smoothing: {
                 value: this.properties.smoothing,
                 min: 0.1,
-                max: 0.9,
+                max: 1,
                 step: 0.05,
                 type: 'range'
             },

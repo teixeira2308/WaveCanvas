@@ -116,11 +116,13 @@ class VisualizationEngine {
     }
 
     resize() {
-        if (document.fullscreenElement) {
-            this.resizeFullscreen();
-        } else {
-            this.resizeNormal();
-        }
+        setTimeout(() => {
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement) {
+                this.resizeFullscreen();
+            } else {
+                this.resizeNormal();
+            }
+        }, 100);
     }
     
     resizeNormal() {
@@ -128,6 +130,11 @@ class VisualizationEngine {
         if (container) {
             this.canvas.width = container.clientWidth;
             this.canvas.height = container.clientHeight;
+
+            this.canvas.style.width = '100%';
+            this.canvas.style.height = '100%';
+            //this.canvas.width = containerWidth;
+            //this.canvas.height = containerHeight;
 
             for (const [key, viz] of this.visualizations) {
                 viz.canvas = this.canvas;
@@ -144,6 +151,8 @@ class VisualizationEngine {
     }
 
     resizeFullscreen() {
+        this.canvas.style.width = '100vw';
+        this.canvas.style.height = '100vh';
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
 
@@ -170,6 +179,25 @@ class VisualizationEngine {
         if (this.currentVisualization) {
             this.currentVisualization.updateProperty(property, value);
             console.log(`Atualizando propriedade: ${property} = ${value}`);
+        }
+    }
+
+    changeColor(color, backgroundColor) {
+        switch (this.currentVisualization) {
+            case BallVisualization: 
+                this.currentVisualization.property.ballColor = color;
+                this.currentVisualization.property.backgroundColor = backgroundColor;
+                break;
+            case ParticleVisualization:
+                this.currentVisualization.property.backgroundColor = backgroundColor;
+                break;
+            case SpectrumVisualization:
+                this.currentVisualization.property.backgroundColor = backgroundColor;
+                break;
+            case WaveformVisualization:
+                this.currentVisualization.property.backgroundColor = backgroundColor;
+                this.currentVisualization.property.color = color;
+                break; 
         }
     }
 }

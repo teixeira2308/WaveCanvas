@@ -9,7 +9,8 @@ class BallVisualization extends AudioVisualization {
             showGrid: false,
             sensitivity: 1.0,
             smoothing: 0.8,
-            radius: 100
+            radius: 100,
+            ballColor: '#4cc9f0'
         };
     }
 
@@ -22,9 +23,6 @@ class BallVisualization extends AudioVisualization {
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
         const maxRadius = Math.min(centerX, centerY) * 0.8;
-
-        this.ctx.fillStyle = 'rgba(15, 52, 96, 0.3)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         const barCount = 120;
         const dataStep = Math.floor(data.length / barCount);
@@ -66,10 +64,12 @@ class BallVisualization extends AudioVisualization {
             }
         }
 
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        this.ctx.strokeStyle = this.properties.ballColor;
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.arc(centerX, centerY, baseRadius, 0, 2 * Math.PI);
+        this.ctx.fillStyle = '#4cc9f020';
+        this.ctx.fill();
         this.ctx.stroke();
         
     }

@@ -92,19 +92,44 @@ class UIManager {
 
         document.getElementById('fullscreenBtn').addEventListener('click', () => {
             this.enterFullscreen();
-            this.app.visualizationEngine.resizeFullscreen();
         });
 
         document.getElementById('resetViewBtn').addEventListener('click', () => {
             this.exitFullscreen();
-            this.app.visualizationEngine.resizeNormal();
+        });
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const colorPicker = document.getElementById('colorPicker');
+            const backgroundPicker = document.getElementById('backgroundColorPicker');
+
+            colorPicker.addEventListener('input', () => {
+                console.log("Cor selecionada:", colorPicker.value);
+            });
+
+            backgroundPicker.addEventListener('input', () => {
+                console.log("Cor de fundo selecionada:", backgroundPicker.value);
+            });
         });
 
         document.addEventListener('fullscreenchange', () => {
             this.onFullscreenChange();
         });
+
+        document.addEventListener('webkitfullscreenchange', () => {
+            this.onFullscreenChange();
+        });
+
+        document.addEventListener('msfullscreenchange', () => {
+            this.onFullscreenChange();
+        });
         
 
+    }
+
+    receiveColor() {
+        const value = document.getElementById('colorPicker').value;
+        console.log(value);
     }
 
     enterFullscreen() {
@@ -113,7 +138,9 @@ class UIManager {
             visualizationArea.requestFullscreen();
         } else if (visualizationArea.webkitRequestFullscreen) { 
             visualizationArea.webkitRequestFullscreen();
-        } 
+        } else if (visualizationArea.msRequestFullscreen) {
+            visualizationArea.msRequestFullscreen();
+        }
 
         document.getElementById('fullscreenBtn').style.display = "none";
         document.getElementById('resetViewBtn').style.display = "block";
@@ -124,18 +151,21 @@ class UIManager {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
+        } else if (document.msRequestFullscreen) {
+            document.msExitFullscreen();
         }
     }
 
     onFullscreenChange() {
-        const isFullscreen = !!document.fullscreenElement;
+        const isFullscreen = !!document.fullscreenElement || !!document.webkitFullscreenElement || !!document.msFullscreenElement;
 
         if (!isFullscreen) {
             document.getElementById('resetViewBtn').style.display = "none";
             document.getElementById('fullscreenBtn').style.display = "block";
+            this.app.visualizationEngine.resizeNormal();
         } else {
             document.getElementById('fullscreenBtn').style.display = "none";
-            document.getElementById('rearViewBtn').style.display = "block";
+            document.getElementById('resetViewBtn').style.display = "block";
         }
     }
 

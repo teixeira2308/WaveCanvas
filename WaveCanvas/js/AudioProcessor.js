@@ -181,7 +181,6 @@ class AudioProcessor {
             sum += this.frequencyData[i];
         }
 
-        console.log(this.frequencyData);
         return sum / (this.frequencyData.length * 255);
     }
 

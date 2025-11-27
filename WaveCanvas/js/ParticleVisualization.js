@@ -6,7 +6,7 @@ class ParticleVisualization extends AudioVisualization {
         this.lastTime = 0;
         this.properties = {
             particleCount: 50,
-            maxDistance: 200,
+            maxDistance: this.canvas.width / 1.5,
             audioReactivity: 1.5,
             minVelocity: 0.1
         };
@@ -50,13 +50,15 @@ class ParticleVisualization extends AudioVisualization {
                 y: Math.random() * this.canvas.height,
                 vx: (Math.random() - 0.5) * 2,
                 vy: (Math.random() - 0.5) * 2,
-                radius: Math.random() * 10 + 1.5,
-                baseRadius: Math.random() * 10 + 1.5,
+                radius: Math.random() * 3 + 1,
+                baseRadius: Math.random() * 3 + 1,
                 hue: Math.random() * 360,
                 saturation: 80 + Math.random() * 20,
-                lightness: 50 + Math.random() * 20
+                lightness: 50 + Math.random() * 20,
+                movementFactor: 0.5 + Math.random() * 1.5
             });
         }
+        console.log(this.canvas.width);
     }
     
     updateParticles() {
@@ -89,7 +91,7 @@ class ParticleVisualization extends AudioVisualization {
         
 
         if (audioLevel > 0.1 && distance < 150) {
-            const repulsiveForce = (audioLevel * 0.5) / (distance + 1);
+            const repulsiveForce = (audioLevel * 0.3) / (distance + 1);
             p.vx += (dx / distance) * repulsiveForce;
             p.vy += (dy / distance) * repulsiveForce;
         }
@@ -97,26 +99,24 @@ class ParticleVisualization extends AudioVisualization {
         p.x += p.vx;
         p.y += p.vy;
 
-  
-        const margin = 30;
         let bounced = false;
         
-        if (p.x < margin) {
-            p.x = margin;
+        if (p.x < p.radius) {
+            p.x = p.radius;
             p.vx = Math.abs(p.vx) * 0.8;
             bounced = true;
-        } else if (p.x > this.canvas.width - margin) {
-            p.x = this.canvas.width - margin;
+        } else if (p.x > this.canvas.width - p.radius) {
+            p.x = this.canvas.width - p.radius;
             p.vx = -Math.abs(p.vx) * 0.8;
             bounced = true;
         }
 
-        if (p.y < margin) {
-            p.y = margin;
+        if (p.y < p.radius) {
+            p.y = p.radius;
             p.vy = Math.abs(p.vy) * 0.8;
             bounced = true;
-        } else if (p.y > this.canvas.height - margin) {
-            p.y = this.canvas.height - margin;
+        } else if (p.y > this.canvas.height - p.radius) {
+            p.y = this.canvas.height - p.radius;
             p.vy = -Math.abs(p.vy) * 0.8;
             bounced = true;
         }
@@ -134,17 +134,8 @@ class ParticleVisualization extends AudioVisualization {
 
         }
 
-
-        const maxSpeed = 8;
-        if (currentSpeed > maxSpeed) {
-            p.vx = (p.vx / currentSpeed) * maxSpeed;
-            p.vy = (p.vy / currentSpeed) * maxSpeed;
-
-        }
-
-
-        p.radius = p.baseRadius * (1 + intensity * 2);
-        p.hue = (p.hue + intensity * 2) % 360;
+        p.radius = p.baseRadius * (1 + intensity * 1.5);
+        p.hue = (p.hue + intensity) % 360;
 
     }          
 }
@@ -201,13 +192,7 @@ class ParticleVisualization extends AudioVisualization {
     resize(width, height) {
         super.resize(width, height);
 
-        const scaleX = width / this.canvas.width;
-        const scaleY = height / this.canvas.height;
-
-        for (const p of this.particles) {
-            p.x *= scaleX;
-            p.y *= scaleY;
-        }
+        this.initParticles();
     }
     get testData() {
         const data = new Uint8Array(256);

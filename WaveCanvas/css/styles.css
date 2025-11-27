@@ -106,14 +106,35 @@ select {
 }
 
 #visualization-area {
-    grid-column: 2;
-    grid-row: 1;
+    width: 100%;
+    height: 500px;
+    position: relative;
+    background: #000;
     background-color: #16213e;
     padding: 20px;
+    padding-bottom: 50px;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+#visualization-area:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+}
+
+#visualization-area:-webkit-full-screen {
+    width: 100vw;
+    height : 100vh;
+    background: #000;
+}
+
+#visualization-area:-ms-fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
 }
 
 #audioCanvas {
@@ -121,6 +142,13 @@ select {
     height: 300px;
     background-color: #0f3460;
     border-radius: 4px;
+    display: block;
+    background: #000;
+}
+
+#visualization-area:fullscreen #audioCanvas {
+    width: 100vh !important;
+    height: 100vh !important;
 }
 
 #audioInfo {
@@ -195,7 +223,7 @@ select {
 }
 
 #fullscreenBtn, #resetViewBtn {
-    margin: 10px 5px;
+    margin: -6px -3px;
     padding: 8px 15px;
     border: none;
     border-radius: 4px;

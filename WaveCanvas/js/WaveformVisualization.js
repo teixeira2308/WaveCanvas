@@ -6,7 +6,7 @@ class WaveformVisualization extends AudioVisualization {
         this.properties = {
             lineWidth: 2,
             lineColor: '#4cc9f0',
-            showCenterLine: true,
+            centerLineOpacity: 0.5,
             amplitude: 1.0
         };
     }
@@ -15,8 +15,8 @@ class WaveformVisualization extends AudioVisualization {
         // TODO: desenhar forma de onda
         this.clearCanvas();
 
-        if (this.properties.showCenterLine) {
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        if (this.properties.centerLineOpacity > 0.05) {
+            this.ctx.strokeStyle = `hsla(${0}, ${0}%, ${100}%, ${this.properties.centerLineOpacity})`;
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();
             this.ctx.moveTo(0, this.canvas.height/2);
@@ -67,9 +67,12 @@ class WaveformVisualization extends AudioVisualization {
                 step: 0.1,
                 type: 'range'
             },
-            showCenterLine: {
-                value: this.properties.showCenterLine,
-                type: 'boolean'
+            centerLineOpacity: {
+                value: this.properties.centerLineOpacity,
+                min: 0,
+                max: 1,
+                step: 0.05,
+                type: 'range'
             },
             lineColor: {
                 value: this.properties.lineColor,

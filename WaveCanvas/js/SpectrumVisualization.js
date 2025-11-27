@@ -6,7 +6,7 @@ class SpectrumVisualization extends AudioVisualization {
         this.smoothedData = new Array(1024).fill(0);
         this.properties = {
             colorScheme: "rainbow",
-            showGrid: true,
+            gridOpacity: 0.1,
             sensitivity: 1.0,
             smoothing: 0.8
         };
@@ -18,9 +18,10 @@ class SpectrumVisualization extends AudioVisualization {
 
         this.clearCanvas();
 
-        if (this.properties.showGrid) {
+        if (this.properties.gridOpacity > 0.05){
             this.drawGrid();
         }
+        
         
         // Implementação básica para teste
         const data = this.audioProcessor ? this.audioProcessor.getFrequencyData() : this.testData;
@@ -60,7 +61,8 @@ class SpectrumVisualization extends AudioVisualization {
     }
 
     drawGrid() {
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+
+        this.ctx.strokeStyle =  `hsla(${0}, ${0}%, ${100}%, ${this.properties.gridOpacity})`;
         this.ctx.lineWidth = 1;
 
         for (let i = 0; i <= 4; i++) {
@@ -89,9 +91,12 @@ class SpectrumVisualization extends AudioVisualization {
                 step: 0.05,
                 type: 'range'
             },
-            showGrid: {
-                value: this.properties.showGrid,
-                type: 'boolean'
+            gridOpacity: {
+                value: this.properties.gridOpacity,
+                min: 0.0,
+                max: 1.0,
+                step: 0.05,
+                type: 'range'
             },
             colorScheme: {
                 value: this.properties.colorScheme,

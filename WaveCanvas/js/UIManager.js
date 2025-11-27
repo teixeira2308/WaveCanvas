@@ -5,7 +5,6 @@ class UIManager {
         this.visualizationEngine = app.visualizationEngine;
         this.audioProcessor = app.audioProcessor;
         
-        // Inicializar interface
         this.setupEventListeners();
         this.setupAudioLevels();
     }
@@ -40,9 +39,12 @@ class UIManager {
 
     createPropertyControl(property, value, min, max, step) {
         // TODO: criar controlo de propriedade
+        
+
         const container = document.createElement('div');
         container.className = 'property-control';
         
+
         const label = document.createElement('label');
         label.textContent = property;
         label.htmlFor = `prop-${property}`;
@@ -69,17 +71,8 @@ class UIManager {
             input.addEventListener('change', (e) => {
                 this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
             });
-        }
-            else if (propertyConfig && propertyConfig.type === 'boolean') {
-            input = document.createElement('input');
-            input.type = 'checkbox';
-            input.id = `prop-${property}`;
-            input.checked = propertyConfig.value;
-            
-            input.addEventListener('change', (e) => {
-                this.visualizationEngine.updateVisualizationProperty(property, e.target.checked);
-            });
-            
+        
+    
         } else if (propertyConfig && propertyConfig.type === 'color') {
             input = document.createElement('input');
             input.type = 'color';

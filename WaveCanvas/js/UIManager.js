@@ -39,86 +39,86 @@ class UIManager {
     }
 
     createPropertyControl(property, value, min, max, step) {
-         // TODO: criar controlo de propriedade
-    const container = document.createElement('div');
-    container.className = 'property-control';
-    
-    const label = document.createElement('label');
-    label.textContent = property;
-    label.htmlFor = `prop-${property}`;
-    
-    const properties = this.visualizationEngine.getVisualizationProperties();
-    const propertyConfig = properties[property];
-    
-    let input;
-    
-    if (propertyConfig && propertyConfig.type === 'select') {
-        input = document.createElement('select');
-        input.id = `prop-${property}`;
+        // TODO: criar controlo de propriedade
+        const container = document.createElement('div');
+        container.className = 'property-control';
         
-        propertyConfig.options.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option;
-            optionElement.textContent = option;
-            if (option === propertyConfig.value) {
-                optionElement.selected = true;
-            }
-            input.appendChild(optionElement);
-        });
+        const label = document.createElement('label');
+        label.textContent = property;
+        label.htmlFor = `prop-${property}`;
         
-        input.addEventListener('change', (e) => {
-            this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
-        });
-    }
-        else if (propertyConfig && propertyConfig.type === 'boolean') {
-        input = document.createElement('input');
-        input.type = 'checkbox';
-        input.id = `prop-${property}`;
-        input.checked = propertyConfig.value;
+        const properties = this.visualizationEngine.getVisualizationProperties();
+        const propertyConfig = properties[property];
         
-        input.addEventListener('change', (e) => {
-            this.visualizationEngine.updateVisualizationProperty(property, e.target.checked);
-        });
+        let input;
         
-    } else if (propertyConfig && propertyConfig.type === 'color') {
-        input = document.createElement('input');
-        input.type = 'color';
-        input.id = `prop-${property}`;
-        input.value = propertyConfig.value;
-        
-        input.addEventListener('input', (e) => {
-            this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
-        });
-        
-    } else {
-        input = document.createElement('input');
-        input.type = 'range';
-        input.id = `prop-${property}`;
-        input.min = min || 0;
-        input.max = max || 100;
-        input.step = step || 1;
-        input.value = value;
-        
-        const valueDisplay = document.createElement('span');
-        valueDisplay.className = 'property-value';
-        valueDisplay.textContent = value;
-        
-        input.addEventListener('input', (e) => {
-            const newValue = parseFloat(e.target.value);
-            this.visualizationEngine.updateVisualizationProperty(property, newValue);
-            valueDisplay.textContent = newValue.toFixed(step < 1 ? 2 : 0);
-        });
+        if (propertyConfig && propertyConfig.type === 'select') {
+            input = document.createElement('select');
+            input.id = `prop-${property}`;
+            
+            propertyConfig.options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                if (option === propertyConfig.value) {
+                    optionElement.selected = true;
+                }
+                input.appendChild(optionElement);
+            });
+            
+            input.addEventListener('change', (e) => {
+                this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
+            });
+        }
+            else if (propertyConfig && propertyConfig.type === 'boolean') {
+            input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = `prop-${property}`;
+            input.checked = propertyConfig.value;
+            
+            input.addEventListener('change', (e) => {
+                this.visualizationEngine.updateVisualizationProperty(property, e.target.checked);
+            });
+            
+        } else if (propertyConfig && propertyConfig.type === 'color') {
+            input = document.createElement('input');
+            input.type = 'color';
+            input.id = `prop-${property}`;
+            input.value = propertyConfig.value;
+            
+            input.addEventListener('input', (e) => {
+                this.visualizationEngine.updateVisualizationProperty(property, e.target.value);
+            });
+            
+        } else {
+            input = document.createElement('input');
+            input.type = 'range';
+            input.id = `prop-${property}`;
+            input.min = min || 0;
+            input.max = max || 100;
+            input.step = step || 1;
+            input.value = value;
+            
+            const valueDisplay = document.createElement('span');
+            valueDisplay.className = 'property-value';
+            valueDisplay.textContent = value;
+            
+            input.addEventListener('input', (e) => {
+                const newValue = parseFloat(e.target.value);
+                this.visualizationEngine.updateVisualizationProperty(property, newValue);
+                valueDisplay.textContent = newValue.toFixed(step < 1 ? 2 : 0);
+            });
+            
+            container.appendChild(label);
+            container.appendChild(input);
+            container.appendChild(valueDisplay);
+            return container;
+        }
         
         container.appendChild(label);
         container.appendChild(input);
-        container.appendChild(valueDisplay);
+        
         return container;
-    }
-    
-    container.appendChild(label);
-    container.appendChild(input);
-    
-    return container;
     }
     
     updateAudioInfo(info, isError = false) {

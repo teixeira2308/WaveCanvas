@@ -62,7 +62,7 @@ class WaveformVisualization extends AudioVisualization {
             },
             amplitude: {
                 value: this.properties.amplitude,
-                min: 0.1,
+                min: 0,
                 max: 1,
                 step: 0.1,
                 type: 'range'

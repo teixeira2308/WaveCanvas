@@ -254,6 +254,7 @@ class ParticleVisualization extends AudioVisualization {
 
         this.initParticles();
     }
+
     get testData() {
         const data = new Uint8Array(256);
         const time = this.frameCount * 0.05;
